@@ -71,7 +71,7 @@ public class SupplyMoneyService {
                 .filter(arg -> arg.getReceivedAt() == null).findFirst();
         takeOne.orElseThrow(() -> new SupplyMoneyException(SupplyMoneyStatus.INTERNAL_ERROR));
         takeOne.get().take(userId);
-        return new ResponseSupplyMoneyDto(takeOne.get());
+        return ResponseSupplyMoneyDto.of(takeOne.get());
     }
 
     @Transactional
@@ -82,7 +82,7 @@ public class SupplyMoneyService {
             throw new SupplyMoneyException(SupplyMoneyStatus.INVALID_OWNER);
         }
 
-        return new ResponseSupplyMoneyDto(supplyMoney.get());
+        return ResponseSupplyMoneyDto.of(supplyMoney.get());
     }
 
     private List<TakeMoney> divideMoney(SupplyMoney supplyMoney) {

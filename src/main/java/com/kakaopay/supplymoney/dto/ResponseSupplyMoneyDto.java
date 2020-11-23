@@ -3,41 +3,54 @@ package com.kakaopay.supplymoney.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.kakaopay.supplymoney.domain.SupplyMoney;
 import com.kakaopay.supplymoney.domain.TakeMoney;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@NoArgsConstructor
+@AllArgsConstructor
 public class ResponseSupplyMoneyDto {
-    private String token;
-    private String createdAt;
-    private String expireAt;
-    private Long totalMoney;
-    private Long takenMoney;
-    private List<SupplyMoneyEachDto> takenList;
+    private final String token;
+    private final String createdAt;
+    private final String expireAt;
+    private final Long totalMoney;
+    private final Long takenMoney;
+    private final List<SupplyMoneyEachDto> takenList;
 
-    public ResponseSupplyMoneyDto(SupplyMoney supplyMoney) {
-        this.token = supplyMoney.getToken();
-        this.createdAt = supplyMoney.getCreatedAt().toLocalDateTime().toString();
-        this.expireAt = supplyMoney.getExpireAt().toLocalDateTime().toString();
-        this.totalMoney = supplyMoney.getTotalMoney();
-        this.takenMoney = 0L;
-        this.takenList = new ArrayList<>();
+    public static ResponseSupplyMoneyDto of(SupplyMoney supplyMoney) {
+        List<SupplyMoneyEachDto> eachMoney = new ArrayList<>();
+        Long[] totalTakenMoney = {0L,};
         supplyMoney.getTakeMoneyRecords().forEach(arg -> {
-            takenList.add(SupplyMoneyEachDto.of(arg));
+            eachMoney.add(SupplyMoneyEachDto.of(arg));
             if (arg.getUserId() != null) {
-                this.takenMoney += arg.getMoneyAmount();
+                totalTakenMoney[0] += arg.getMoneyAmount();
             }
         });
+
+        return ResponseSupplyMoneyDto.builder()
+                .token(supplyMoney.getToken())
+                .createdAt(supplyMoney.getCreatedAt().toLocalDateTime().toString())
+                .expireAt(supplyMoney.getExpireAt().toLocalDateTime().toString())
+                .totalMoney(supplyMoney.getTotalMoney())
+                .takenMoney(totalTakenMoney[0])
+                .takenList(eachMoney)
+                .build();
     }
 
-    public ResponseSupplyMoneyDto(TakeMoney takeMoney) {
-        this.takenMoney = takeMoney.getMoneyAmount();
+    public static ResponseSupplyMoneyDto of(String token) {
+        return ResponseSupplyMoneyDto.builder()
+                .token(token)
+                .build();
+    }
+
+    public static ResponseSupplyMoneyDto of(TakeMoney takeMoney) {
+        return ResponseSupplyMoneyDto.builder()
+                .takenMoney(takeMoney.getMoneyAmount())
+                .build();
     }
 }

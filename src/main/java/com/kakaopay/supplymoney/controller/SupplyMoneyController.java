@@ -25,10 +25,8 @@ public class SupplyMoneyController {
         requestSupplyMoneyDto.setUserId(userId);
         requestSupplyMoneyDto.setRoomId(roomId);
 
-        ResponseSupplyMoneyDto responseSupplyMoneyDto = new ResponseSupplyMoneyDto();
-        responseSupplyMoneyDto.setToken(supplyMoneyService.supplyMoney(requestSupplyMoneyDto));
-
-        return ResponseEntity.ok(new ResponseModel(SupplyMoneyStatus.SUCCESS, responseSupplyMoneyDto));
+        return ResponseEntity.ok(new ResponseModel(SupplyMoneyStatus.SUCCESS,
+                ResponseSupplyMoneyDto.of(supplyMoneyService.supplyMoney(requestSupplyMoneyDto))));
     }
 
     @PutMapping("/api/v1/kakaopay/takemoney/{token}")
