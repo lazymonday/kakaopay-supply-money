@@ -11,6 +11,9 @@ import java.time.OffsetDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(indexes = {
+        @Index(columnList = "supply_id, id", unique = true)
+})
 public class TakeMoney {
 
     @Id

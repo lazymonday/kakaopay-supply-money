@@ -32,6 +32,10 @@ public class SupplyMoneyService {
 
     @Transactional
     public String supplyMoney(RequestSupplyMoneyDto requestSupplyMoneyDto) {
+        if (requestSupplyMoneyDto.getTotalMoney() == null || requestSupplyMoneyDto.getShareCount() == null) {
+            throw new SupplyMoneyException(SupplyMoneyStatus.BAD_REQUEST);
+        }
+
         if (requestSupplyMoneyDto.getTotalMoney() <= 1 || requestSupplyMoneyDto.getShareCount() <= 1) {
             throw new SupplyMoneyException(SupplyMoneyStatus.INVALID_ARGUMENT);
         }
