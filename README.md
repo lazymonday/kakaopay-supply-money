@@ -5,6 +5,10 @@
 - H2
 - Gradle
 
+### 서버 포트
+- 8080
+
+
 ### 실행
 ```bash
 $ ./gradlew build
