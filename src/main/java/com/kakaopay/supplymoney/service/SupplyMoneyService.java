@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import java.util.Optional;
 public class SupplyMoneyService {
     final int tokenLength = 3;
     final int validPeriodInMin = 10;    // data를 어디에 두지?
+    final int maximalTryCountForNoDuplicate = 30;
     private final SupplyMoneyRepository supplyMoneyRepository;
     private final TakeMoneyRepository takeMoneyRepository;
 
@@ -57,7 +59,7 @@ public class SupplyMoneyService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ResponseSupplyMoneyDto takeMoney(Long userId, String roomId, String token) {
         Optional<SupplyMoney> supplyMoney = supplyMoneyRepository.findByTokenAndRoomIdAndExpireAtAfter(
-                token, roomId, OffsetDateTime.now());
+                token, roomId, OffsetDateTime.now(ZoneOffset.UTC));
 
         supplyMoney.orElseThrow(() -> new SupplyMoneyException(SupplyMoneyStatus.INVALID_TOKEN));
         SupplyMoney spMoney = supplyMoney.get();
@@ -85,7 +87,7 @@ public class SupplyMoneyService {
 
     @Transactional
     public ResponseSupplyMoneyDto descSupplyMoney(Long userId, String roomId, String token) {
-        Optional<SupplyMoney> supplyMoney = supplyMoneyRepository.findByTokenAndOwnerIdAndRoomIdCreatedAtAfter(
+        Optional<SupplyMoney> supplyMoney = supplyMoneyRepository.findByTokenAndOwnerIdAndRoomIdAndCreatedAtAfter(
                 token, userId, roomId, OffsetDateTime.now().minusDays(7));
         supplyMoney.orElseThrow(() -> new SupplyMoneyException(SupplyMoneyStatus.EXPIRED_TOKEN));
         if (!supplyMoney.get().getOwnerId().equals(userId)) {
@@ -98,10 +100,17 @@ public class SupplyMoneyService {
     private String getUniqueToken(int tokenLength, Long userId, String roomId) {
         String candidateToken = TokenUtil.createRandomToken(tokenLength);
         OffsetDateTime now = OffsetDateTime.now().minusMinutes(validPeriodInMin);
-        while (supplyMoneyRepository.countByTokenAndOwnerIdAndRoomIdAndExpireAtBefore(
-                candidateToken,
-                userId, roomId, now) > 0) {
+        int tryCount = 0;
+        while (tryCount < maximalTryCountForNoDuplicate &&
+                supplyMoneyRepository.countByTokenAndOwnerIdAndRoomIdAndExpireAtBefore(
+                        candidateToken,
+                        userId, roomId, now) > 0) {
             candidateToken = TokenUtil.createRandomToken(tokenLength);
+            ++tryCount;
+        }
+
+        if (tryCount == maximalTryCountForNoDuplicate) {
+            throw new SupplyMoneyException(SupplyMoneyStatus.INTERNAL_ERROR);
         }
 
         return candidateToken;

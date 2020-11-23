@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,11 +48,11 @@ public class SupplyMoney {
         this.roomId = requestSupplyMoneyDto.getRoomId();
         this.totalMoney = requestSupplyMoneyDto.getTotalMoney();
         this.shareCount = requestSupplyMoneyDto.getShareCount();
-        this.createdAt = OffsetDateTime.now();
+        this.createdAt = OffsetDateTime.now(ZoneOffset.UTC);
         this.expireAt = createdAt.plusMinutes(availablePeriodInMin);
     }
 
     public boolean isExpired() {
-        return expireAt.isBefore(OffsetDateTime.now());
+        return expireAt.isBefore(OffsetDateTime.now(ZoneOffset.UTC));
     }
 }

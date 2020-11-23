@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 
 @Entity
@@ -38,7 +39,7 @@ public class TakeMoney {
 
     public long take(Long takenUserId) {
         this.userId = takenUserId;
-        receivedAt = OffsetDateTime.now();
+        receivedAt = OffsetDateTime.now(ZoneOffset.UTC);
         return moneyAmount;
     }
 }

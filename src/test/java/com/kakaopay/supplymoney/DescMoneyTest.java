@@ -28,7 +28,7 @@ public class DescMoneyTest extends SupplyMoneyCoreTest {
     @Test
     void T01_뿌린_돈_조회_성공() throws Exception {
 
-        when(supplyMoneyRepository.findByTokenAndOwnerIdAndRoomIdCreatedAtAfter(
+        when(supplyMoneyRepository.findByTokenAndOwnerIdAndRoomIdAndCreatedAtAfter(
                 anyString(), any(Long.class), anyString(), any(OffsetDateTime.class))).
                 thenReturn(Optional.of(SampleData.sampleData()));
 
@@ -44,7 +44,7 @@ public class DescMoneyTest extends SupplyMoneyCoreTest {
     @Test
     void T02_뿌린_돈_조회_실패() throws Exception {
 
-        when(supplyMoneyRepository.findByTokenAndOwnerIdAndRoomIdCreatedAtAfter(
+        when(supplyMoneyRepository.findByTokenAndOwnerIdAndRoomIdAndCreatedAtAfter(
                 anyString(), any(Long.class), anyString(), any(OffsetDateTime.class))).
                 thenReturn(Optional.of(SampleData.sampleData()));
 
@@ -56,7 +56,7 @@ public class DescMoneyTest extends SupplyMoneyCoreTest {
 
     @Test
     void T03_뿌린_돈_조회_실패() throws Exception {
-        when(supplyMoneyRepository.findByTokenAndOwnerIdAndRoomIdCreatedAtAfter(
+        when(supplyMoneyRepository.findByTokenAndOwnerIdAndRoomIdAndCreatedAtAfter(
                 anyString(), any(Long.class), anyString(), any(OffsetDateTime.class))).
                 thenReturn(Optional.empty());
 
