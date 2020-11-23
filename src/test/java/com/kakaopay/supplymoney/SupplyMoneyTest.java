@@ -6,13 +6,8 @@ import com.kakaopay.supplymoney.domain.TakeMoneyRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.time.OffsetDateTime;
-
 import static org.hamcrest.Matchers.hasLength;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,10 +30,6 @@ public class SupplyMoneyTest extends SupplyMoneyCoreTest {
 
     @Test
     void T02_돈_뿌리기_실패_01() throws Exception {
-        // when
-        when(supplyMoneyRepository.findByTokenAndCreatedAtAfter(anyString(), any(OffsetDateTime.class)))
-                .thenReturn(null);
-
         // then
         supplyMoney(SampleData.ownerId, SampleData.roomId, SampleData.totalSupplyMoney, 0L)
                 .andExpect(status().isBadRequest())
@@ -47,10 +38,6 @@ public class SupplyMoneyTest extends SupplyMoneyCoreTest {
 
     @Test
     void T03_돈_뿌리기_실패_02() throws Exception {
-        // when
-        when(supplyMoneyRepository.findByTokenAndCreatedAtAfter(anyString(), any(OffsetDateTime.class)))
-                .thenReturn(null);
-
         // then
         supplyMoney(SampleData.ownerId, SampleData.roomId, 100L, 101L)
                 .andExpect(status().isBadRequest())

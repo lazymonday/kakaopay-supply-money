@@ -1,11 +1,13 @@
-package com.kakaopay.supplymoney.service;
+package com.kakaopay.supplymoney.util;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Random;
 
+@RequiredArgsConstructor
 @Slf4j
-public class TokenService {
+public class TokenUtil {
     private static final String baseCharset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final int charsetLength = baseCharset.length();
     private static final Random random = new Random();

@@ -8,6 +8,7 @@ import com.kakaopay.supplymoney.domain.TakeMoneyRepository;
 import com.kakaopay.supplymoney.dto.RequestSupplyMoneyDto;
 import com.kakaopay.supplymoney.dto.ResponseSupplyMoneyDto;
 import com.kakaopay.supplymoney.exception.SupplyMoneyException;
+import com.kakaopay.supplymoney.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,10 @@ public class SupplyMoneyService {
             throw new SupplyMoneyException(SupplyMoneyStatus.NOT_ENOUGH_MONEY);
         }
 
-        String token = TokenService.createRandomToken(tokenLength);
+        String token = getUniqueToken(tokenLength,
+                requestSupplyMoneyDto.getUserId(),
+                requestSupplyMoneyDto.getRoomId());
+
         SupplyMoney supplyMoney = new SupplyMoney(token, requestSupplyMoneyDto, validPeriodInMin);
         supplyMoneyRepository.save(supplyMoney);
         takeMoneyRepository.saveAll(divideMoney(supplyMoney));
@@ -48,7 +52,8 @@ public class SupplyMoneyService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ResponseSupplyMoneyDto takeMoney(Long userId, String roomId, String token) {
-        Optional<SupplyMoney> supplyMoney = supplyMoneyRepository.findByToken(token);
+        Optional<SupplyMoney> supplyMoney = supplyMoneyRepository.findByTokenAndRoomIdAndExpireAtAfter(
+                token, roomId, OffsetDateTime.now());
 
         supplyMoney.orElseThrow(() -> new SupplyMoneyException(SupplyMoneyStatus.INVALID_TOKEN));
         SupplyMoney spMoney = supplyMoney.get();
@@ -76,13 +81,26 @@ public class SupplyMoneyService {
 
     @Transactional
     public ResponseSupplyMoneyDto descSupplyMoney(Long userId, String roomId, String token) {
-        Optional<SupplyMoney> supplyMoney = supplyMoneyRepository.findByTokenAndCreatedAtAfter(token, OffsetDateTime.now().minusDays(7));
+        Optional<SupplyMoney> supplyMoney = supplyMoneyRepository.findByTokenAndOwnerIdAndRoomIdCreatedAtAfter(
+                token, userId, roomId, OffsetDateTime.now().minusDays(7));
         supplyMoney.orElseThrow(() -> new SupplyMoneyException(SupplyMoneyStatus.EXPIRED_TOKEN));
         if (!supplyMoney.get().getOwnerId().equals(userId)) {
             throw new SupplyMoneyException(SupplyMoneyStatus.INVALID_OWNER);
         }
 
         return ResponseSupplyMoneyDto.of(supplyMoney.get());
+    }
+
+    private String getUniqueToken(int tokenLength, Long userId, String roomId) {
+        String candidateToken = TokenUtil.createRandomToken(tokenLength);
+        OffsetDateTime now = OffsetDateTime.now().minusMinutes(validPeriodInMin);
+        while (supplyMoneyRepository.countByTokenAndOwnerIdAndRoomIdAndExpireAtBefore(
+                candidateToken,
+                userId, roomId, now) > 0) {
+            candidateToken = TokenUtil.createRandomToken(tokenLength);
+        }
+
+        return candidateToken;
     }
 
     private List<TakeMoney> divideMoney(SupplyMoney supplyMoney) {

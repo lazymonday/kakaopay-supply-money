@@ -6,7 +6,9 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 public interface SupplyMoneyRepository extends JpaRepository<SupplyMoney, Long> {
-    Optional<SupplyMoney> findByToken(String token);
+    Optional<SupplyMoney> findByTokenAndRoomIdAndExpireAtAfter(String token, String roomId, OffsetDateTime now);
 
-    Optional<SupplyMoney> findByTokenAndCreatedAtAfter(String token, OffsetDateTime now);
+    Optional<SupplyMoney> findByTokenAndOwnerIdAndRoomIdCreatedAtAfter(String token, Long owenrId, String RoomId, OffsetDateTime now);
+
+    int countByTokenAndOwnerIdAndRoomIdAndExpireAtBefore(String token, Long userId, String roomId, OffsetDateTime now);
 }

@@ -28,7 +28,8 @@ public class DescMoneyTest extends SupplyMoneyCoreTest {
     @Test
     void T01_뿌린_돈_조회_성공() throws Exception {
 
-        when(supplyMoneyRepository.findByTokenAndCreatedAtAfter(anyString(), any(OffsetDateTime.class))).
+        when(supplyMoneyRepository.findByTokenAndOwnerIdAndRoomIdCreatedAtAfter(
+                anyString(), any(Long.class), anyString(), any(OffsetDateTime.class))).
                 thenReturn(Optional.of(SampleData.sampleData()));
 
         this.descSupplyMoney(SampleData.token, SampleData.ownerId, SampleData.roomId)
@@ -43,7 +44,8 @@ public class DescMoneyTest extends SupplyMoneyCoreTest {
     @Test
     void T02_뿌린_돈_조회_실패() throws Exception {
 
-        when(supplyMoneyRepository.findByTokenAndCreatedAtAfter(anyString(), any(OffsetDateTime.class))).
+        when(supplyMoneyRepository.findByTokenAndOwnerIdAndRoomIdCreatedAtAfter(
+                anyString(), any(Long.class), anyString(), any(OffsetDateTime.class))).
                 thenReturn(Optional.of(SampleData.sampleData()));
 
         this.descSupplyMoney(SampleData.token, 1234L, SampleData.roomId)
@@ -54,8 +56,9 @@ public class DescMoneyTest extends SupplyMoneyCoreTest {
 
     @Test
     void T03_뿌린_돈_조회_실패() throws Exception {
-        when(supplyMoneyRepository.findByTokenAndCreatedAtAfter(anyString(), any(OffsetDateTime.class))).
-                thenReturn(Optional.ofNullable(null));
+        when(supplyMoneyRepository.findByTokenAndOwnerIdAndRoomIdCreatedAtAfter(
+                anyString(), any(Long.class), anyString(), any(OffsetDateTime.class))).
+                thenReturn(Optional.empty());
 
         this.descSupplyMoney(SampleData.token, SampleData.ownerId, SampleData.roomId)
                 .andExpect(status().isBadRequest())

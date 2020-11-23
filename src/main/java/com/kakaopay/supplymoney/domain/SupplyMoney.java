@@ -14,6 +14,9 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@Table(indexes = {
+        @Index(columnList = "token, ownerId, roomId, expireAt", unique = true)
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SupplyMoney {
 

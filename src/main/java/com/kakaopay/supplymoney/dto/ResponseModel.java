@@ -7,22 +7,15 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ResponseModel {
+public class ResponseModel<T> implements IResponseModel {
     private String errCode;
     private String errMsg;
-    private Object result;
+    private T result;
 
-    public ResponseModel(SupplyMoneyStatus status, Object anyObj) {
+    public ResponseModel(SupplyMoneyStatus status, T anyObj) {
         super();
         this.errCode = status.getCode();
         this.errMsg = status.getDesc();
-        this.result = anyObj;
-    }
-
-    public ResponseModel(String errCode, String errMsg, Object anyObj) {
-        super();
-        this.errCode = errCode;
-        this.errMsg = errMsg;
         this.result = anyObj;
     }
 

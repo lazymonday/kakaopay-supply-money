@@ -17,6 +17,7 @@ public enum SupplyMoneyStatus {
     INVALID_TOKEN("106", "Given token is invalid"),
     INVALID_ROOM("107", "Invalid room with given token"),
     INVALID_OWNER("108", "Invalid owner of supply money."),
+    BAD_REQUEST("400", "Bad request with invalid header."),
     INTERNAL_ERROR("500", "Internal Error"),
     ;
 
