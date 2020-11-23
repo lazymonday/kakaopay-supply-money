@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.Optional;
+
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -26,18 +28,18 @@ public class TakeMoneyTest extends SupplyMoneyCoreTest {
     @Test
     void T01_돈_받기_성공_01() throws Exception {
 
-        when(supplyMoneyRepository.findByToken(anyString())).thenReturn(SampleData.sampleData());
+        when(supplyMoneyRepository.findByToken(anyString())).thenReturn(Optional.of((SampleData.sampleData())));
 
         takeMoney(SampleData.token, 1890L, SampleData.roomId)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errCode", is(SupplyMoneyStatus.SUCCESS.getCode())))
-                .andExpect(jsonPath("$.result.takenMoney", is(24)));
+                .andExpect(jsonPath("$.result.takenMoney", is(24L), Long.class));
     }
 
     @Test
     void T02_돈_받기_실패_01() throws Exception {
 
-        when(supplyMoneyRepository.findByToken(anyString())).thenReturn(SampleData.sampleData());
+        when(supplyMoneyRepository.findByToken(anyString())).thenReturn(Optional.of(SampleData.sampleData()));
 
         takeMoney(SampleData.token, SampleData.takenUserId, SampleData.roomId)
                 .andExpect(status().isBadRequest())
@@ -50,7 +52,7 @@ public class TakeMoneyTest extends SupplyMoneyCoreTest {
         sample.getTakeMoneyRecords().get(1).take(2000L);
         sample.getTakeMoneyRecords().get(2).take(3000L);
 
-        when(supplyMoneyRepository.findByToken(anyString())).thenReturn(sample);
+        when(supplyMoneyRepository.findByToken(anyString())).thenReturn(Optional.of(sample));
 
         takeMoney(SampleData.token, 4000L, SampleData.roomId)
                 .andExpect(status().isBadRequest())
@@ -59,7 +61,7 @@ public class TakeMoneyTest extends SupplyMoneyCoreTest {
 
     @Test
     void T04_돈_받기_실패_03() throws Exception {
-        when(supplyMoneyRepository.findByToken(anyString())).thenReturn(SampleData.sampleData());
+        when(supplyMoneyRepository.findByToken(anyString())).thenReturn(Optional.of(SampleData.sampleData()));
 
         takeMoney(SampleData.token, SampleData.ownerId, SampleData.roomId)
                 .andExpect(status().isBadRequest())
@@ -71,7 +73,8 @@ public class TakeMoneyTest extends SupplyMoneyCoreTest {
     void T05_돈_받기_실패_04() throws Exception {
         SupplyMoney supplyMoney = Mockito.mock(SupplyMoney.class);
         when(supplyMoney.isExpired()).thenReturn(true);
-        when(supplyMoneyRepository.findByToken(anyString())).thenReturn(supplyMoney);
+        ;
+        when(supplyMoneyRepository.findByToken(anyString())).thenReturn(Optional.of(supplyMoney));
 
         takeMoney(SampleData.token, 2000L, SampleData.roomId)
                 .andExpect(status().isBadRequest())

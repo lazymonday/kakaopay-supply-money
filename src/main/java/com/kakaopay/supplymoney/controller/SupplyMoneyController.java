@@ -2,8 +2,8 @@ package com.kakaopay.supplymoney.controller;
 
 import com.kakaopay.supplymoney.constants.Header;
 import com.kakaopay.supplymoney.constants.SupplyMoneyStatus;
-import com.kakaopay.supplymoney.dto.ResponseModel;
 import com.kakaopay.supplymoney.dto.RequestSupplyMoneyDto;
+import com.kakaopay.supplymoney.dto.ResponseModel;
 import com.kakaopay.supplymoney.dto.ResponseSupplyMoneyDto;
 import com.kakaopay.supplymoney.service.SupplyMoneyService;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +28,7 @@ public class SupplyMoneyController {
         ResponseSupplyMoneyDto responseSupplyMoneyDto = new ResponseSupplyMoneyDto();
         responseSupplyMoneyDto.setToken(supplyMoneyService.supplyMoney(requestSupplyMoneyDto));
 
-        ResponseModel response = new ResponseModel(SupplyMoneyStatus.SUCCESS, responseSupplyMoneyDto);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ResponseModel(SupplyMoneyStatus.SUCCESS, responseSupplyMoneyDto));
     }
 
     @PutMapping("/api/v1/kakaopay/takemoney/{token}")
@@ -37,18 +36,16 @@ public class SupplyMoneyController {
                                             @RequestHeader(Header.ROOM_ID) String roomId,
                                             @PathVariable String token) {
 
-        ResponseSupplyMoneyDto resultObj = supplyMoneyService.takeMoney(userId, roomId, token);
-        ResponseModel response = new ResponseModel(SupplyMoneyStatus.SUCCESS, resultObj);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ResponseModel(SupplyMoneyStatus.SUCCESS,
+                supplyMoneyService.takeMoney(userId, roomId, token)));
     }
 
     @GetMapping("/api/v1/kakaopay/descsupplymoney/{token}")
     ResponseEntity<ResponseModel> descSupplyMoney(@RequestHeader(Header.USER_ID) Long userId,
-                                                 @RequestHeader(Header.ROOM_ID) String roomId,
-                                                 @PathVariable String token) {
+                                                  @RequestHeader(Header.ROOM_ID) String roomId,
+                                                  @PathVariable String token) {
 
-        ResponseSupplyMoneyDto resultObj = supplyMoneyService.descSupplyMoney(userId, roomId, token);
-        ResponseModel response = new ResponseModel(SupplyMoneyStatus.SUCCESS, resultObj);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ResponseModel(SupplyMoneyStatus.SUCCESS,
+                supplyMoneyService.descSupplyMoney(userId, roomId, token)));
     }
 }

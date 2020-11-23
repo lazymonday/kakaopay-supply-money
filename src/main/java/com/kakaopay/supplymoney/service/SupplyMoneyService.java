@@ -17,8 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -27,7 +26,6 @@ import java.util.stream.Collectors;
 public class SupplyMoneyService {
     final int tokenLength = 3;
     final int validPeriodInMin = 10;    // data를 어디에 두지?
-    final Random random;
     private final SupplyMoneyRepository supplyMoneyRepository;
     private final TakeMoneyRepository takeMoneyRepository;
 
@@ -50,55 +48,47 @@ public class SupplyMoneyService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ResponseSupplyMoneyDto takeMoney(Long userId, String roomId, String token) {
-        SupplyMoney supplyMoney = supplyMoneyRepository.findByToken(token);
+        Optional<SupplyMoney> supplyMoney = supplyMoneyRepository.findByToken(token);
 
-        if (supplyMoney == null) {
-            throw new SupplyMoneyException(SupplyMoneyStatus.INVALID_TOKEN);
-        }
-
-        if (supplyMoney.isExpired()) {
+        supplyMoney.orElseThrow(() -> new SupplyMoneyException(SupplyMoneyStatus.INVALID_TOKEN));
+        SupplyMoney spMoney = supplyMoney.get();
+        if (spMoney.isExpired()) {
             throw new SupplyMoneyException(SupplyMoneyStatus.EXPIRED_TOKEN);
-        } else if (!supplyMoney.getRoomId().equals(roomId)) {
+        } else if (!spMoney.getRoomId().equals(roomId)) {
             throw new SupplyMoneyException(SupplyMoneyStatus.INVALID_ROOM);
-        } else if (supplyMoney.getOwnerId().equals(userId)) {
+        } else if (spMoney.getOwnerId().equals(userId)) {
             throw new SupplyMoneyException(SupplyMoneyStatus.CANT_TAKE_MONEY_ITSELF);
-        } else if (supplyMoney.getTakeMoneyRecords().stream()
+        } else if (spMoney.getTakeMoneyRecords().stream()
                 .filter(arg -> arg.getUserId() != null)
                 .anyMatch(arg -> arg.getUserId().equals(userId))) {
             throw new SupplyMoneyException(SupplyMoneyStatus.ALREADY_TAKEN);
-        } else if (supplyMoney.getTakeMoneyRecords().stream()
+        } else if (spMoney.getTakeMoneyRecords().stream()
                 .noneMatch(arg -> arg.getReceivedAt() == null)) {
             throw new SupplyMoneyException(SupplyMoneyStatus.NO_MORE_MONEY);
         }
 
-        List<TakeMoney> takeAbles = supplyMoney.getTakeMoneyRecords().stream()
-                .filter(arg -> arg.getReceivedAt() == null)
-                .collect(Collectors.toList());
-
-        TakeMoney takeOne = takeAbles.get(0);
-        takeOne.take(userId);
-        return new ResponseSupplyMoneyDto(takeOne);
+        Optional<TakeMoney> takeOne = spMoney.getTakeMoneyRecords().stream()
+                .filter(arg -> arg.getReceivedAt() == null).findFirst();
+        takeOne.orElseThrow(() -> new SupplyMoneyException(SupplyMoneyStatus.INTERNAL_ERROR));
+        takeOne.get().take(userId);
+        return new ResponseSupplyMoneyDto(takeOne.get());
     }
 
     @Transactional
     public ResponseSupplyMoneyDto descSupplyMoney(Long userId, String roomId, String token) {
-
-        SupplyMoney supplyMoney = supplyMoneyRepository.findByTokenAndCreatedAtAfter(token, OffsetDateTime.now().minusDays(7));
-        if(supplyMoney == null) {
-            throw new SupplyMoneyException(SupplyMoneyStatus.EXPIRED_TOKEN);
-        }
-
-        if(!supplyMoney.getOwnerId().equals(userId)) {
+        Optional<SupplyMoney> supplyMoney = supplyMoneyRepository.findByTokenAndCreatedAtAfter(token, OffsetDateTime.now().minusDays(7));
+        supplyMoney.orElseThrow(() -> new SupplyMoneyException(SupplyMoneyStatus.EXPIRED_TOKEN));
+        if (!supplyMoney.get().getOwnerId().equals(userId)) {
             throw new SupplyMoneyException(SupplyMoneyStatus.INVALID_OWNER);
         }
 
-        return new ResponseSupplyMoneyDto(supplyMoney);
+        return new ResponseSupplyMoneyDto(supplyMoney.get());
     }
 
     private List<TakeMoney> divideMoney(SupplyMoney supplyMoney) {
         assert (supplyMoney.getTotalMoney() >= supplyMoney.getShareCount());
 
-        ArrayList<TakeMoney> takeMoneyEachList = new ArrayList<>();
+        List<TakeMoney> takeMoneyEachList = new ArrayList<>();
         Long consumeMoney = supplyMoney.getShareCount();
         final Long minimalMoney = 1L;
         for (int i = 0; i < supplyMoney.getShareCount() - 1; ++i) {

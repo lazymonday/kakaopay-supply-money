@@ -1,5 +1,10 @@
 package com.kakaopay.supplymoney.constants;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@RequiredArgsConstructor
 public enum SupplyMoneyStatus {
     SUCCESS("000", "Operation Success"),
 
@@ -17,16 +22,4 @@ public enum SupplyMoneyStatus {
 
     private final String code;
     private final String desc;
-
-    SupplyMoneyStatus(String code, String desc) {
-        this.code = code;
-        this.desc = desc;
-    }
-
-    public String getCode() {
-        return code;
-    }
-    public String getDesc() {
-        return desc;
-    }
 }

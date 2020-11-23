@@ -59,9 +59,9 @@ abstract public class SupplyMoneyCoreTest {
                 ;
     }
 
-    public ResultActions fetchSupplyMoney(String token, Long userId, String roomId) throws Exception {
+    public ResultActions descSupplyMoney(String token, Long userId, String roomId) throws Exception {
         StringBuilder sb = new StringBuilder();
-        sb.append("/api/v1/kakaopay/supplymoney/").append(token);
+        sb.append("/api/v1/kakaopay/descsupplymoney/").append(token);
         return mockMvc.perform(
                 get(sb.toString())
                         .contentType(MediaType.APPLICATION_JSON)
