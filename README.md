@@ -16,6 +16,7 @@ $ java -jar supply-money-0.0.1-SNAPSHOT.jar
 - SupplyMoney : 뿌리기 정보
 - TakeMoney : 돈 줍기
 - ![schema](./schema.png)
+
 ### 설계 시 고려된 부분
 - 기본적인 돈 뿌리기, 돈 가져가기, 조회 기능에 충실했다.
     - 일단은 요구사항이 복잡하지 않아 예외 처리에 더 중점을 두었다.
@@ -30,19 +31,21 @@ $ java -jar supply-money-0.0.1-SNAPSHOT.jar
 
 ### API
 1. 뿌리기 API
+
     Request
     - URI : /api/v1/kakaopay/supplymoney
     - Http Method : POST
     - Headers
         - X-USER-ID : 머니를 뿌리는 사용자 아이디 ( 숫자)
         - X-ROOM-ID : 머니를 뿌리는 채팅방 아이디
-    - Body
-        ```cpp
-        {
-        	 "totalMoney":"100000",
-        	 "shareCount":"5"
-        }
-        ```
+        
+    Body
+    ```cpp
+    {
+         "totalMoney":"100000",
+         "shareCount":"5"
+    }
+    ```
 
     Response
     ```json
